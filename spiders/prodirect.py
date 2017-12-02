@@ -19,15 +19,10 @@ class ProdirectSpider(CrawlSpider):
     name = 'prodirect'
     allowed_domains = ['prodirectrunning.com']
 
-    def declare_xpath(self):
-        self.getAllListXpath = "//*[@class='list']//a/@href"
-        self.getAllProductXpath = "//*[@class='item']/a/@href"
-
     def start_requests(self):
         for url in self.start_urls:
             # yield scrapy.Request(url, dont_filter=True)
             request = Request(url, callback=self.parse_category, dont_filter=True)
-            request.meta['Category'] = 'Null'
             print request
             yield request
 
@@ -40,7 +35,7 @@ class ProdirectSpider(CrawlSpider):
 
     def __init__(self, *args, **kwargs):
 
-        self.declare_xpath()
+        super(ProdirectSpider, self).__init__()
         self.category_name = kwargs['category_name']
         start_urls = StartURLs()
         self.start_urls = start_urls.get_start_urls(self.category_name)
@@ -54,32 +49,32 @@ class ProdirectSpider(CrawlSpider):
             script_type="replenishment",
             category_name=self.category_name
         )
-        super(ProdirectSpider, self).__init__()
 
     def parse_category(self, response):
-
         print response
         products = LinkExtractor(restrict_xpaths='//*[@class="item"]').extract_links(response)
         for product in products:
             if product.url:
-                request = Request(product.url, callback=self.parse_item, priority=random.choice(range(-2, 2)))
+                request = Request(product.url, callback=self.parse_item)
                 yield request
         next_page = response.xpath('//*[@class ="next-page"]/a/@href').extract_first()
-        print next_page
+        print "Next Page", next_page
         if next_page:
-             yield Request(url='http://www.prodirectrunning.com/'+next_page, callback=self.parse_category)
+            yield Request(url='http://www.prodirectrunning.com/'+next_page, callback=self.parse_category)
 
     def parse_item(self, response):
         print response
-        item = ProdirectrunningItem()
-        hxs = HtmlXPathSelector(response)
-        item['product_name'] = hxs.select('//*[@id="define-profile"]/h1/text()').extract()
-        item['description'] = hxs.select(
-         '//*[@id="content"]/div/div[4]/div[1]/div/div[2]/div[1]/text()').extract()
-        item['price'] = hxs.select('//*[@id="define-profile"]/p[3]/text()').extract_first()
-        item['product_url'] = response.url
-
-        return item
+        if not response.xpath('//*[@class ="flex-active-slide"]').extract():
+            item = {}
+            item['Product Name'] = response.xpath('//*[@class="right-column"]/h1/text()').extract()
+            print item['Product Name']
+            item['Price'] = response.xpath('//*[@class="right-column"]/p[3]/text()').extract()
+            print item['Price']
+            item['Product URL'] = response.url
+            print item['Product URL']
+            item['Product Code'] = response.xpath('//*[@id = "content"]//div/@data-quickref').extract()
+            print item['Product Code']
+            return item
 
 
 def start_spider():

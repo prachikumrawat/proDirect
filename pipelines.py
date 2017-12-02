@@ -52,20 +52,23 @@ class MongoDBPipeline(object):
 
     def db_connect(self):
         client = MongoClient('mongodb://localhost:27017/')
-        db = client[self.db_name]
-        collection = db[self.category_name]
-        print collection
+        self.db = client[self.db_name]
+        print self.db
+        self.collection = self.db[self.category_name]
+        print self.collection
+        # collection = db[self.category_name]
+        # collection = client[self.db[self.category_name]]
+        # print collection
         # if self.collection in self.db:
         #     if 'y' in raw_input('Erase previous data for {} (Y/N): '.format(self.category_name)).lower():
         #         self.collection.drop()
 
     def process_item(self, itemp, spider):
         # client = MongoClient('mongodb://localhost:27017/')
-        # self.db = client[self.db_name]
-        # self.collection = client[self.db[self.category_name]]
+        # self.collection = client[self.db_name[self.category_name]]
 
-        self.db_name[self.collection_name].insert(dict(itemp))
-        return itemp
+        self.collection.insert(itemp)
+        # return itemp
 
     def get_instock_inventory(self, sku_suffix, script_type, category_name, **kwargs):
         client = MongoClient('mongodb://localhost:27017/')
@@ -88,26 +91,8 @@ class MongoDBPipeline(object):
 
         elif script_type == "replenishment":
             cursor = masterfile.find()
-
-        if kwargs.get('API_Update'):
-            asin_list = []
-            updated_inventory = {document['asin']: '' for document in self.collection.find({})}
-            print 'Previously updated asins {}'.format(len(updated_inventory))
-
-            for document in cursor:
-                if not updated_inventory.get(document['asin']):
-                    asin_list.append(document['asin'])
-                else:
-                    del (updated_inventory[document['asin']])
-
-            print 'Running Updates for {} asins'.format(len(asin_list))
-            return tuple(asin_list)
-
-        else:
-            masterfile_asin_list = []
-            for row in cursor:
-                masterfile_asin_list.append(row['asin'].strip())
-            return masterfile_asin_list
+            print cursor
+            print 'count', masterfile.find({'Source': category_name}).count()
 
 
 class DuplicatesPipeline(object):
@@ -120,4 +105,5 @@ class DuplicatesPipeline(object):
             raise DropItem("Duplicate item found: %s" % itemp)
         else:
             self.ids_seen.add(itemp['id'])
-            return itemp
+        return itemp
+

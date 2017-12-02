@@ -10,8 +10,8 @@ import scrapy
 
 class ProdirectrunningItem(scrapy.Item):
     # define the fields for your item here like:
-    product_name = scrapy.Field()
-    price = scrapy.Field()
-    description = scrapy.Field()
-    product_url = scrapy.Field()
+    # product_name = scrapy.Field()
+    # description = scrapy.Field()
+    # price = scrapy.Field()
+    # product_url = scrapy.Field()
     pass

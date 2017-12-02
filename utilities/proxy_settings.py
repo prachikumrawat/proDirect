@@ -22,31 +22,29 @@ proxy_settings = {
 }
 
 storm_proxy_settings = {
-    'DOWNLOADER_MIDDLEWARES': {'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
-                               'utilities.stormproxy.ProxyMiddleware': 100},
+    'DOWNLOADER_MIDDLEWARES': {'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,},
     'ITEM_PIPELINES': {'pipelines.MongoDBPipeline': 100},
     'CONCURRENT_REQUESTS': 30,
     'CONCURRENT_REQUESTS_PER_DOMAIN': 20,
     'DOWNLOAD_DELAY': 5,
     'AUTOTHROTTLE_ENABLED': True,
-    'COOKIES_ENABLED': False
+    'COOKIES_ENABLED': True
 }
 crawlera_proxy_settings = {
     'DOWNLOADER_MIDDLEWARES': {'scrapy_crawlera.CrawleraMiddleware': 300},
     'CRAWLERA_ENABLED': True,
     'CRAWLERA_APIKEY': '00bc5d0e8cb54879b3816fc395cac46b',
-    'CRAWLERA_URL': 'http://prodirectrunning.com:8010',
-    'DOWNLOAD_DELAY':10,
+    'CRAWLERA_URL': 'http://proxy.crawlera.com:8010',
+    'DOWNLOAD_DELAY':5,
     'CRAWLERA_DOWNLOAD_TIMEOUT': 190,
     'RETRY_ENABLED'  : True,
-    # 'AUTOTHROTTLE_ENABLED': False,
-    'CONCURRENT_REQUESTS': 100,
-    'CONCURRENT_REQUESTS_PER_DOMAIN': 100,
+    'AUTOTHROTTLE_ENABLED': False,
+    'CONCURRENT_REQUESTS': 30,
+    'CONCURRENT_REQUESTS_PER_DOMAIN': 30,
 }
 
 charity_engine_settings = {
     'DOWNLOADER_MIDDLEWARES': {'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,},
-                               # 'utilities.proxy_settings.ProxyMiddleware': 100},
     'ITEM_PIPELINES': {'pipelines.MongoDBPipeline': 100},
     'CONCURRENT_REQUESTS': 100,
     'CONCURRENT_REQUESTS_PER_DOMAIN': 100,
