@@ -9,7 +9,7 @@ import time
 import sys
 from pymongo import MongoClient
 from scrapy.exceptions import DropItem
-# from utilities.write_csv import WriteCSV
+from utilities.write_csv import WriteCSV
 
 # from scrapy.conf import settings
 from pprint import pprint
@@ -35,46 +35,31 @@ class MongoDBPipeline(object):
 
     def open_spider(self, spider):
         print 'Opening..'
-        client = MongoClient('mongodb://localhost:27107/')
-        print client
-        # self.output_file = open('../utilities/bin/Output/prodirect_running.csv', 'w+b')
-
-        db = client[self.db_name]
-        print db
-        # self.db[self.category_name].drop()
+        self.output_file = open('../utilities/bin/output/prodirect_running.csv', 'w+b')
 
     def close_spider(self, spider):
-        # WriteCSV(self.output_file)
-        # self.output_file.close()
-        # client = MongoClient('mongodb://localhost:27017/')
-        self.client.close()
+        WriteCSV(self.output_file, self.category_name)
+        self.output_file.close()
         print 'closing..'
 
     def db_connect(self):
         client = MongoClient('mongodb://localhost:27017/')
         self.db = client[self.db_name]
-        print self.db
         self.collection = self.db[self.category_name]
-        print self.collection
-        # collection = db[self.category_name]
-        # collection = client[self.db[self.category_name]]
-        # print collection
-        # if self.collection in self.db:
-        #     if 'y' in raw_input('Erase previous data for {} (Y/N): '.format(self.category_name)).lower():
-        #         self.collection.drop()
+
+        if self.collection:
+            if 'y' in raw_input('Erase previous data for {} (Y/N): '.format(self.category_name)).lower():
+                self.collection.drop()
 
     def process_item(self, itemp, spider):
-        # client = MongoClient('mongodb://localhost:27017/')
-        # self.collection = client[self.db_name[self.category_name]]
-
-        self.collection.insert(itemp)
-        # return itemp
+        self.collection.insert(dict(itemp))
+        return itemp
 
     def get_instock_inventory(self, sku_suffix, script_type, category_name, **kwargs):
         client = MongoClient('mongodb://localhost:27017/')
         master_db = client['Prodirect_Running']
-        if category_name == "Mens Running":
-            masterfile = master_db['Mens_Running']
+        if category_name == "MensRunning":
+            masterfile = master_db['MensRunning']
         elif category_name == "Running":
             masterfile = master_db['Running']
         else:
@@ -90,8 +75,9 @@ class MongoDBPipeline(object):
                                                ]})
 
         elif script_type == "replenishment":
-            cursor = masterfile.find()
-            print cursor
+            # cursor = masterfile.find()
+            # print cursor
+            # print category_name
             print 'count', masterfile.find({'Source': category_name}).count()
 
 

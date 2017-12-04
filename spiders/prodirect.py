@@ -14,6 +14,8 @@ from utilities.start_urls import StartURLs
 from utilities.proxy_settings import choose_settings, proxy_settings, charity_engine_settings
 from pipelines import MongoDBPipeline
 from utilities.cleanUpClass import CleanUp_class
+from utilities.csv_pipeline import CsvPipeline
+
 
 class ProdirectSpider(CrawlSpider):
     name = 'prodirect'
@@ -21,10 +23,15 @@ class ProdirectSpider(CrawlSpider):
 
     def start_requests(self):
         for url in self.start_urls:
-            # yield scrapy.Request(url, dont_filter=True)
-            request = Request(url, callback=self.parse_category, dont_filter=True)
-            print request
-            yield request
+            if isinstance(url, tuple):
+                category_page = url
+                request = Request(category_page, callback=self.parse_category)
+                print request
+                yield request
+            else:
+                for start_url in self.start_urls:
+                    request = Request(start_url, callback=self.parse_category)
+                    yield request
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -39,7 +46,6 @@ class ProdirectSpider(CrawlSpider):
         self.category_name = kwargs['category_name']
         start_urls = StartURLs()
         self.start_urls = start_urls.get_start_urls(self.category_name)
-        # print self.start_urls
         self.cleanUp = CleanUp_class(self.category_name)
         sku_suffix = self.cleanUp.sku_suffix(self.category_name)
         self.MongoDB = MongoDBPipeline(self.category_name)
@@ -58,7 +64,6 @@ class ProdirectSpider(CrawlSpider):
                 request = Request(product.url, callback=self.parse_item)
                 yield request
         next_page = response.xpath('//*[@class ="next-page"]/a/@href').extract_first()
-        print "Next Page", next_page
         if next_page:
             yield Request(url='http://www.prodirectrunning.com/'+next_page, callback=self.parse_category)
 
@@ -66,14 +71,16 @@ class ProdirectSpider(CrawlSpider):
         print response
         if not response.xpath('//*[@class ="flex-active-slide"]').extract():
             item = {}
-            item['Product Name'] = response.xpath('//*[@class="right-column"]/h1/text()').extract()
-            print item['Product Name']
-            item['Price'] = response.xpath('//*[@class="right-column"]/p[3]/text()').extract()
-            print item['Price']
+            item['Product Code/SKU'] = response.xpath('//*[@id = "content"]//div/@data-quickref').extract_first()
+            item['Product Name'] = response.xpath('//*[@class="right-column"]/h1/text()').extract_first()
+            price_xpath = response.xpath('//*[@class="right-column"]/p[3]/text()').extract_first()
+            price = price_xpath.encode('ascii', 'ignore').decode('ascii').strip()
+            cost_price = float(price) * 85.00  #converstion_rate = 85.00
+            item['Cost Price'] = cost_price
+            selling_price = cost_price + 500.00 + (cost_price * .15) # Shipping_Cost = 500.00 , Profit = 15/100
+            item['Selling Price'] = selling_price
             item['Product URL'] = response.url
-            print item['Product URL']
-            item['Product Code'] = response.xpath('//*[@id = "content"]//div/@data-quickref').extract()
-            print item['Product Code']
+            item['Quantity'] = 5
             return item
 
 

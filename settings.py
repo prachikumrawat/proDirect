@@ -67,6 +67,7 @@ DOWNLOADER_MIDDLEWARES = {
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'prodirectrunning.pipelines.MongoDBPipeline': 300,
+   'prodirectrunning.pipelines.CsvPipeline': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
