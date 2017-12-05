@@ -37,6 +37,7 @@ class MongoDBPipeline(object):
         print 'Opening..'
         self.output_file = open('../utilities/bin/output/prodirect_running.csv', 'w+b')
 
+
     def close_spider(self, spider):
         WriteCSV(self.output_file, self.category_name)
         self.output_file.close()
@@ -46,10 +47,10 @@ class MongoDBPipeline(object):
         client = MongoClient('mongodb://localhost:27017/')
         self.db = client[self.db_name]
         self.collection = self.db[self.category_name]
-
         if self.collection:
             if 'y' in raw_input('Erase previous data for {} (Y/N): '.format(self.category_name)).lower():
                 self.collection.drop()
+
 
     def process_item(self, itemp, spider):
         self.collection.insert(dict(itemp))
@@ -58,10 +59,10 @@ class MongoDBPipeline(object):
     def get_instock_inventory(self, sku_suffix, script_type, category_name, **kwargs):
         client = MongoClient('mongodb://localhost:27017/')
         master_db = client['Prodirect_Running']
-        if category_name == "MensRunning":
-            masterfile = master_db['MensRunning']
-        elif category_name == "Running":
-            masterfile = master_db['Running']
+        if category_name == "MensRunningShoes":
+            masterfile = master_db['MensRunningShoes']
+        elif category_name == "RunningShoes":
+            masterfile = master_db['RunningShoes']
         else:
             print "Incorrect choice! The script will now terminate, please rerun and choose a valid choice"
             time.sleep(5)

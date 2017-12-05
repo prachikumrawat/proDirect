@@ -9,7 +9,7 @@ class CleanUp_class(object):
 
     def sku_dict(self):
         dict = {
-                'MensRunning': 'MENSRUNN',
-                'Running': 'RUNNING',
+                'MensRunningShoes': 'MENSRUNN',
+                'RunningShoes': 'RUNNING',
                 }
         return dict

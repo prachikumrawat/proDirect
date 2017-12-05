@@ -26,7 +26,6 @@ class ProdirectSpider(CrawlSpider):
             if isinstance(url, tuple):
                 category_page = url
                 request = Request(category_page, callback=self.parse_category)
-                print request
                 yield request
             else:
                 for start_url in self.start_urls:
@@ -49,7 +48,6 @@ class ProdirectSpider(CrawlSpider):
         self.cleanUp = CleanUp_class(self.category_name)
         sku_suffix = self.cleanUp.sku_suffix(self.category_name)
         self.MongoDB = MongoDBPipeline(self.category_name)
-        print self.MongoDB
         self.masterfile_asin_list = self.MongoDB.get_instock_inventory(
             sku_suffix=sku_suffix,
             script_type="replenishment",
@@ -80,6 +78,34 @@ class ProdirectSpider(CrawlSpider):
             selling_price = cost_price + 500.00 + (cost_price * .15) # Shipping_Cost = 500.00 , Profit = 15/100
             item['Selling Price'] = selling_price
             item['Product URL'] = response.url
+            if response.xpath("//*[@id='content']/div/div[4]/div[1]/div/ul/li[1]"):
+                description = response.xpath("//*[@id='content']/div/div[4]/div[1]/div/div[2]/div[1]/text()").extract()
+                item['Description'] = ''.join(description).strip()
+
+            images_xpath = response.xpath("//*[@class='product-slider-holder']//li/img/@src").extract()
+            item['Product Image1'] = 'http://www.prodirectrunning.com/'+images_xpath[0]
+            item['Product Image2'] = 'http://www.prodirectrunning.com/'+images_xpath[1]
+
+            size_list = response.xpath('//*[@name="size"]/option/text()').extract()[1:]
+            if 'OUT OF STOCK' in size_list:
+                pass
+            else:
+                for size in size_list:
+                    item['Size'] = size
+
+            # indexes = [1, 2]
+            # for index, image in zip(images_xpath, indexes):
+            #     image_name = image
+            #     item['Product Image-{}'.format(index)] = image_name
+            #     if index == 2:
+            #         break
+            # for index, image in enumerate(images_xpath, 1):
+            #     item['Product Image-{}'.format(index)] = image
+            #     if index == 3:
+            #         break
+            # for image in images_xpath:
+            #     print 'http://www.prodirectrunning.com/'+image
+
             item['Quantity'] = 5
             return item
 
