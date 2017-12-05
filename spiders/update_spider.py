@@ -9,8 +9,8 @@ from pipelines import MongoDBPipeline
 from utilities.cleanUpClass import CleanUp_class
 
 
-class ProdirectSpider(CrawlSpider):
-    name = 'prodirect'
+class UpdateSpider(CrawlSpider):
+    name = 'update_prodirect'
     allowed_domains = ['prodirectrunning.com']
 
     @classmethod
@@ -22,7 +22,6 @@ class ProdirectSpider(CrawlSpider):
 
     def __init__(self, *args, **kwargs):
 
-        super(ProdirectSpider, self).__init__()
         self.category_name = kwargs['category_name']
         start_urls = StartURLs()
         self.start_urls = start_urls.get_start_urls(self.category_name)
@@ -34,9 +33,22 @@ class ProdirectSpider(CrawlSpider):
             script_type="update",
             category_name=self.category_name
         )
+        super(UpdateSpider, self).__init__()
 
-    def parse(self):
-        pass
+    def parse_item(self, response):
+        print response
+        if not response.xpath('//*[@class ="flex-active-slide"]').extract():
+            update_item={}
+
+            update_item['Product Code/SKU'] = response.xpath('//*[@id = "content"]//div/@data-quickref').extract_first()
+            update_item['Product Name'] = response.xpath('//*[@class="right-column"]/h1/text()').extract_first()
+            price_xpath = response.xpath('//*[@class="right-column"]/p[3]/text()').extract_first()
+            price = price_xpath.encode('ascii', 'ignore').decode('ascii').strip()
+            cost_price = float(price) * 85.00  # converstion_rate = 85.00
+            update_item['Price'] = cost_price
+            selling_price = cost_price + 500.00 + (cost_price * .15)  # Shipping_Cost = 500.00 , Profit = 15/100
+            update_item['Selling Price'] = selling_price
+            return update_item
 
 
 def start_spider():
@@ -48,7 +60,7 @@ def start_spider():
     settings.update(choose_settings())
 
     process = CrawlerProcess(settings)
-    process.crawl(ProdirectSpider)
+    process.crawl(UpdateSpider)
     process.start()
 
 

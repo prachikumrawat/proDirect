@@ -86,8 +86,8 @@ class ProdirectSpider(CrawlSpider):
             item['Product Image1'] = 'http://www.prodirectrunning.com/'+images_xpath[0]
             item['Product Image2'] = 'http://www.prodirectrunning.com/'+images_xpath[1]
 
-            size_list = response.xpath('//*[@name="size"]/option/text()').extract()[1:]
-            if 'OUT OF STOCK' in size_list:
+            size_list = response.xpath('//*[@name="size"]/option/@value').extract()[1:]
+            if list('OUT OF STOCK') in size_list:
                 pass
             else:
                 for size in size_list:
