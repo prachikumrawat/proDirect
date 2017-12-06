@@ -13,7 +13,6 @@ from utilities.cleanUpClass import CleanUp_class
 from utilities.restrictions import Restrictions
 
 
-
 class ProdirectSpider(CrawlSpider):
     name = 'prodirect'
     allowed_domains = ['prodirectrunning.com']

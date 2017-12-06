@@ -4,20 +4,17 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import pymongo
 import time
 import sys
 from pymongo import MongoClient
 from scrapy.exceptions import DropItem
 from utilities.write_csv import WriteCSV
 
-# from scrapy.conf import settings
-from pprint import pprint
 
 class MongoDBPipeline(object):
-    collection_name = 'Mens_Running'
+    # collection_name = 'Mens_Running'
 
-    def __init__(self, category_name, **kwargs):
+    def __init__(self, category_name):
         self.category_name = category_name
         self.client = MongoClient('mongodb://localhost:27107/')
         self.db_name = 'Prodirect_Running'
@@ -35,7 +32,7 @@ class MongoDBPipeline(object):
 
     def open_spider(self, spider):
         print 'Opening..'
-        self.output_file = open('../utilities/bin/output/prodirect_running.csv', 'w+b')
+        self.output_file = open('../utilities/bin/output/updated_data.csv', 'w+b')
 
 
     def close_spider(self, spider):

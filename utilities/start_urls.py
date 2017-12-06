@@ -39,7 +39,19 @@ class StartURLs(object):
                     if row['URL'] not in start_urls_list:
                         row['URL'] = row['URL'].replace('+AC0', '')
                         start_urls_list.append(row['URL'])
-                        time.sleep(3)
+                        time.sleep(2)
 
-        # print start_urls_list
         return start_urls_list
+
+    def read_urls(self):
+        product_url_list = []
+
+        file_path = os.path.realpath('../utilities/bin/output/prodirect_running.csv')
+        with open(file_path, 'r') as update_spider_file:
+            for row in csv.DictReader(update_spider_file):
+                if row['Product URL'] not in product_url_list:
+                    print row['Product URL']
+                    product_url_list.append(row['Product URL'])
+
+            return product_url_list
+
