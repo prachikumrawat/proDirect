@@ -36,7 +36,7 @@ class MongoDBPipeline(object):
 
 
     def close_spider(self, spider):
-        WriteCSV(self.output_file, self.category_name)
+        WriteCSV(self.output_file , self.category_name)
         self.output_file.close()
         print 'closing..'
 

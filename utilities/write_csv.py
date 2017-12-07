@@ -13,16 +13,15 @@ class WriteCSV(object):
         self.writer.writeheader()
         db = client.Prodirect_Running
         print db
-        collection = db['Updates_Running'].find({})
-        # print "Collections:", collections
-        # for collection in collections:
-        #     print collection
-        self.writecsv(collection)
+        collections = db[category_name].find({})
+        print "Collections:", collections
+        for collection in collections:
+            print collection
+            self.writecsv(collection)
 
     def writecsv(self, product):
         del product['_id']
         self.writer.writerow(product)
-
 
     def __del__(self):
         print 'Done'
